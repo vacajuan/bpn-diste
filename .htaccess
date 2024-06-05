@@ -1,6 +1,18 @@
 RewriteEngine On
-RewriteBase /
-RewriteRule ^index\.html$ - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.html [L]
+
+# Obtiene la dirección IP del visitante
+RewriteCond %{HTTP:X-Forwarded-For} ^(.*)$
+RewriteRule .* - [E=CLIENT_IP:%1]
+
+# Verifica si la dirección IP no está en Argentina o Chile
+RewriteCond %{ENV:CLIENT_IP} !^190\.|^201\.
+
+# Redirige a los usuarios de otros países
+RewriteRule ^(.*)$ https://www.google.com [R=302,L]
+
+# Restringir acceso basado en la dirección IP
+order deny,allow
+deny from all
+allow from 127.0.0.1
+allow from 190.0.0.0/8 # Rango de direcciones IP asignado a Argentina
+allow from 201.0.0.0/8 # Rango de direcciones IP asignado a Chile
